@@ -1,0 +1,83 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin:  'kotlin-kapt'
+
+android {
+    compileSdkVersion 33
+    defaultConfig {
+        applicationId "com.demo.nearby"
+        minSdkVersion 19
+        targetSdkVersion 33
+        versionCode 3
+        versionName "0.1.2"
+        vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+    }
+
+    buildFeatures {
+        dataBinding true
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue 'string', "nearby_messages_api_key", NearbyChat_NearbyMessagesAPIKeyRelease
+        }
+        debug {
+            resValue 'string', "nearby_messages_api_key", NearbyChat_NearbyMessagesAPIKeyDebug
+        }
+    }
+}
+
+android.applicationVariants.all { variant ->
+    def appName
+
+    if (project.hasProperty("applicationName")) {
+        appName = applicationName
+    } else {
+        appName = parent.name
+    }
+
+    variant.outputs.all {
+        outputFileName = "${appName}-${variant.name}-${variant.versionName}-${variant.versionCode}.apk"
+    }
+
+    // Copy mapping file to project root directory
+    if (variant.getBuildType().isMinifyEnabled()) {
+        variant.assemble.doLast {
+            copy {
+                from "${mappingFile}"
+                into "${rootDir}"
+                rename { String fileName ->
+                    "mapping-${appName}-${variant.name}-${variant.versionName}-${variant.versionCode}.txt"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.media:media:1.6.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.annotation:annotation:1.5.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.gms:play-services-nearby:18.3.0'
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation "com.mikepenz:aboutlibraries:6.0.8"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21'
+    implementation 'androidx.core:core-ktx:1.9.0'
+}
+repositories {
+    mavenCentral()
+}
